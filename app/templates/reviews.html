@@ -1,0 +1,49 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+
+var total = 0,
+    valid_labels = 0,
+    average;
+
+$(document).ready(function(){
+    $('.rating').each(function () {
+    var val = parseInt(this.innerHTML, 10);
+    valid_labels += 1;
+    total += val;
+  });
+  average = total / valid_labels;
+  if(total == 0) {
+    $('.ratingCalc').text('No reviews yet.');
+  }
+  else {
+  $('.ratingCalc').text('Average Rating: ' + average + ' Stars');
+}
+});
+
+</script>
+
+{% extends "base.html" %}
+
+{% block app_content %}
+<div class="well ratingCalc" style="font-size: 2em"></div>
+
+  {% for review in reviews %}
+      <span class="rating" style="display: None;">{{ review.rating }}</span>
+      {% include '_review.html' %}
+  {% endfor %}
+  <nav aria-label="...">
+      <ul class="pager">
+          <li class="previous{% if not prev_url %} disabled{% endif %}">
+              <a href="{{ prev_url or '#' }}">
+                  <span aria-hidden="true">&larr;</span> {{ _('Newer posts') }}
+              </a>
+          </li>
+          <li class="next{% if not next_url %} disabled{% endif %}">
+              <a href="{{ next_url or '#' }}">
+                  {{ _('Older posts') }} <span aria-hidden="true">&rarr;</span>
+              </a>
+          </li>
+      </ul>
+  </nav>
+{% endblock %}

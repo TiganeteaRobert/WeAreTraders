@@ -1,0 +1,40 @@
+<style>
+.center-cropped {
+  object-fit: cover;
+  object-position: center;
+  height: 100px;
+  width: 100px;
+}
+
+</style>
+<table class="table table-hover">
+    <tr>
+        <td>
+          <div>
+            <a href='{{ url_for('main.postpage', postid = post['id']) }}'>
+              <img class="center-cropped" src='{{ url_for('static', filename = post.id|string + '.jpg') }}'>
+            </a>
+        </div>
+        </td>
+        <td>
+            {% set user_link %}
+                <a href="{{ url_for('main.user', username=post.author.username) }}">
+                    {{ post.author.username }}
+                </a>
+            {% endset %}
+            <span style="float: left; width: 30vw; text-overflow: ellipsis; overflow: hidden;"><b><a href='{{ url_for('main.postpage', postid = post.id) }}'>{{ post.title }}</b></a></span>
+            <span style="float: right; font-size: 0.75em;">{{ _('%(when)s by %(username)s',
+                username=user_link, when=moment(post.timestamp).fromNow()) }}</span>
+            <br>
+
+            <span style="float: left; width: 45vw; height: 6vh; text-overflow: ellipsis; overflow: hidden;" id="post{{ post.id }}">{{ post.body }}</span>
+            <span style="float: right; font-size: 2vh" id="post{{ post.id }}"><br><b>Price: &nbsp</b>{{ post.price }} Lei</span>
+        </td>
+        <td> {% if user == current_user %}
+          <a href='{{ url_for('main.removelisting', id = post.id) }}'>
+            <span style='font-size: 1.5em; color: red;' class="glyphicon glyphicon-remove"></span>
+          </a>
+        {% endif %}
+      </td>
+    </tr>
+</table>

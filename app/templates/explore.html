@@ -1,0 +1,158 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<style>
+.center-cropped {
+  object-fit: cover;
+  object-position: center;
+  height: 100px;
+  width: 100px;
+}
+
+</style>
+
+<script>
+
+var nrofposts = 0;
+data = JSON.stringify({'nrofposts':nrofposts});
+
+String.prototype.format = String.prototype.f = function() {
+    var s = this,
+        i = arguments.length;
+
+    while (i--) {
+        s = s.replace(new RegExp('\\{' + i + '\\}', 'gm'), arguments[i]);
+    }
+    return s;
+};
+
+$(document).ready(function(){
+      $.ajax({
+      type: 'Post',
+      data : data,
+      url : '/showmore',
+      success : function (posts) {
+        var data = JSON.parse(posts);
+        var posts = [];
+        for (var i = 0; i < data.posts.length; i++) {
+            posts.push(data.posts[i]);
+        }
+        var template = $('#hidden-template').html();
+        for(var i = 0; i < posts.length; i++) {
+          post = posts[i];
+          var postid = post['id'].toString();
+          var filename = postid + '.jpg';
+
+          var item = $(template).clone();
+
+          $(item).find('#posttitle').html(post['title']);
+
+          $(item).find('#posttitlehref').prop('href', '/post/' + postid);
+
+          $(item).find('#postbody').html(post['body']);
+
+          $(item).find('#postprice').html(post['price']);
+
+          $(item).find('#photo').prop('src', '/static/' + filename);
+
+          $(item).find('#postphoto').prop('href', '/post/' + postid);
+
+          $('#poststable').append(item);
+        }
+      },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(data);
+            console.log("ERROR AT REQUEST:"+thrownError);
+        }
+    });
+
+    $('#showmorebutton').click(function(e) {
+      e.preventDefault();
+      nrofposts += 5;
+      data = JSON.stringify({'nrofposts':nrofposts});
+      $.ajax({
+      type: 'Post',
+      data : data,
+      url : '/showmore',
+      success : function (posts) {
+        var data = JSON.parse(posts);
+        var posts = [];
+        for (var i = 0; i < data.posts.length; i++) {
+            posts.push(data.posts[i]);
+        }
+        var template = $('#hidden-template').html();
+        for(var i = 0; i < posts.length; i++) {
+          post = posts[i];
+          var postid = post['id'].toString();
+          var filename = postid + '.jpg';
+
+          var item = $(template).clone();
+
+          $(item).find('#posttitle').html(post['title']);
+
+          $(item).find('#posttitlehref').prop('href', '/post/' + postid);
+
+          $(item).find('#postbody').html(post['body']);
+
+          $(item).find('#postprice').html(post['price']);
+
+          $(item).find('#photo').prop('src', '/static/' + filename);
+
+          $(item).find('#postphoto').prop('href', '/post/' + postid);
+
+          $('#poststable').append(item);
+        }
+      },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(data);
+            console.log("ERROR AT REQUEST:"+thrownError);
+        }
+    });
+  });
+});
+
+</script>
+
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>
+      <span style="float: right"> <button type="button" class="btn btn-primary" onclick="window.location.href='{{ url_for( 'main.addlisting' ) }}';">Add Listing</button>
+    </h1>
+    <div style="height: 5vh"></div>
+    <div id="list"></div>
+
+    {% if form %}
+    {{ wtf.quick_form(form, extra_classes='mx-sm-3') }}
+    <br>
+    {% endif %}
+    {% for post in posts %}
+    <table id="poststable" class="table">
+    </table>
+    {% endfor %}
+    <script id="hidden-template" type="text/x-custom-template">
+      <table id="hidetable" class="table table-hover">
+          <tr>
+          <td>
+            <div>
+              <a id="postphoto" href=''>
+                <img id="photo" class="center-cropped" src=''>
+              </a>
+          </div>
+          </td>
+              <td>
+                  <b><a id="posttitlehref"><span id="posttitle" style="float: left; width: 30vw; text-overflow: ellipsis; overflow: hidden;"></span></a></b>
+                  <br>
+                  <span id="postbody" style="float: left; width: 45vw; height: 6vh; text-overflow: ellipsis; overflow: hidden;"></span>
+                  <span style="float:right">&nbsp Lei </span><b><span style="float:right" id="postprice"></span></b><b><span style="float:right">Price: &nbsp</span></b>
+              </td>
+          </tr>
+      </table>
+    </script>
+    <nav id="target" aria-label="...">
+      <span style="">
+        <input type="button" id="showmorebutton" class="btn-lg btn-primary" value="Show 5 more"></button>
+      </span>
+    </nav>
+  <br>
+  <br>
+{% endblock %}

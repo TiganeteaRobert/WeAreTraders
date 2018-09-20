@@ -1,0 +1,96 @@
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{{ form.submit(id="submitbutton") }}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+
+$(document).ready(function(){
+    $('#editbutton').click(function(){
+      $('#hider').show();
+    });
+
+    $('#submitbutton').click(function(e) {
+    e.preventDefault();
+    $.ajax({
+      url:"/user/",
+      success: function(data) {
+        userdata = JSON.parse(userdump);
+        $('#userName').text( 'User:&nbsp', userdata['username'] )
+        },
+        error: function() {
+            console.log("ERROR");
+        }
+    });
+  });
+});
+
+</script>
+
+<style>
+
+</style>
+
+{% extends "base.html" %}
+
+{% block app_content %}
+    <table class="table table-hover">
+        <tr>
+            <td width="256px"><img style="width: 10vw" src="{{ user.avatar(256) }}"></td>
+            <td>
+                <h1 id="userName">{{ _('User') }}: {{ user.username }}</h1>
+                {% if user.about_me %}<p id="userAboutme">{{ user.about_me }}</p>{% endif %}
+                {% if user.last_seen %}
+                <p>{{ _('Last seen on') }}: {{ moment(user.last_seen).format('LLL') }}</p>
+                {% endif %}
+                <p>{{ _('%(count)d followers', count=user.followers.count()) }}, {{ _('%(count)d following', count=user.followed.count()) }}</p>
+                <a href="{{ url_for('main.reviews', username=user.username) }}">
+                  <span style="float:left" class="btn-lg btn-primary">Reviews</span>
+                  <span style="float:left">&nbsp</span>
+                </a>
+                {% if user == current_user %}
+                  <span style="float:left">
+                    <button id="editbutton" class="btn-lg btn-primary">Edit Profile</button>
+                  </span>
+                {% elif not current_user.is_following(user) %}
+                <a href='{{ url_for('main.addreview', username = user.username) }}'>
+                  <span style="float:right;" class="btn-lg btn-primary">Add Review</span>
+                </a>
+                <a href="{{ url_for('main.follow', username=user.username) }}">
+                  <span style="float:left" class="btn-lg btn-primary">Follow</span>
+                </a>
+                {% else %}
+                <a href='{{ url_for('main.addreview', username = user.username) }}'>
+                  <span style="float:right;" class="btn-lg btn-primary">Add Review</span>
+                </a>
+                <a href="{{ url_for('main.unfollow', username=user.username) }}">
+                  <span style="float:left" class="btn-lg btn-primary">Unfollow</span>
+                </a>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+          <div style="display:none" id="hider">
+              {{ wtf.quick_form(form) }}
+          </div>
+        </tr>
+    </table>
+    {% for post in posts %}
+        {% include '_post.html' %}
+    {% endfor %}
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span> {{ _('Newer posts') }}
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    {{ _('Older posts') }} <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

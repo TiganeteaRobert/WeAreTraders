@@ -1,0 +1,76 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+
+$(document).ready(function(){
+    $('.revealphone').click(function(){
+        var $this = $(this);
+        $this.text('{{ post.author.phone }}');
+        $('.revealphone').prop('disabled', true);
+        $('.revealphone').css('background-color', 'SeaGreen');
+    });
+});
+
+</script>
+
+<style>
+.center-cropped {
+  object-fit: cover;
+  object-position: center;
+  height: 25vh;
+  width: 25vh;
+}
+
+</style>
+
+{% extends "base.html" %}
+
+{% block app_content %}
+    <table class="table">
+        <tr>
+          <span style="float:left;"><h1>{{ post.title }}</h1></span>
+          <span style="float:right;"><h1>Price: {{ post.price }} Lei</h1></span>
+        </tr>
+        <tr>
+          <td>
+              {% if post.author == current_user %}
+                <a href='{{ url_for('main.removelisting', id = post.id) }}'>
+                  <span style='font-size: 1.5em; color: red; float:right' class="glyphicon glyphicon-remove"></span>
+                </a>
+              {% endif %}
+            <div style="width:25vh; height:25vh;">
+              <a href="#" data-toggle="modal" data-target="#image-gallery">
+                <img class="center-cropped" src='{{ url_for('static', filename = post.id|string + '.jpg') }}'>
+              </a>
+            </div>
+            <span style="float: right">
+               <button type="button" class="btn-lg btn-success revealphone">Reveal Phone Number</button>
+            </span>
+            <span> <div id="phonediv" style="width:80px;height:80px;display:none;background-color: ForestGreen;"> {{ post.author.phone }} </div> </span>
+          </td>
+          <tr>
+            <td>
+                <p>{{ _('Date posted:') }} {{ post.timestamp.strftime('%Y-%m-%d at %R') }}</p>
+                <blockquote> {{ post.body }}</blockquote>
+            </td>
+        </tr>
+    </table>
+      <div class="modal fade" id="image-gallery" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                  <h4 class="modal-title" id="image-gallery-title"></h4>
+              </div>
+              <div class="modal-body">
+                  <img id="image-gallery-image" class="img-responsive" src='{{ url_for('static', filename = post.id|string + '.jpg') }}'>
+              </div>
+              <div class="modal-footer">
+              </div>
+          </div>
+      </div>
+  </div>
+    {% for post in posts %}
+        {% include '_post.html' %}
+    {% endfor %}
+{% endblock %}

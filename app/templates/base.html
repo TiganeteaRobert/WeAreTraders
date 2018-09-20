@@ -1,0 +1,163 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<style>
+.navbar .dropdown-toggle, .navbar .dropdown-menu a {
+    cursor: pointer;
+}
+
+.navbar .dropdown-item.active, .navbar .dropdown-item:active {
+    color: inherit;
+    text-decoration: none;
+    background-color: inherit;
+}
+
+.navbar .dropdown-item:focus, .navbar .dropdown-item:hover {
+    color: #16181b;
+    text-decoration: none;
+    background-color: #f8f9fa;
+}
+
+@media (min-width: 767px) {
+    .navbar .dropdown-toggle:not(.nav-link)::after {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        margin-left: .5em;
+        vertical-align: 0;
+        border-bottom: .3em solid transparent;
+        border-top: .3em solid transparent;
+        border-left: .3em solid;
+    }
+}
+
+</style>
+
+<script>
+$(document).ready(function () {
+
+    $('.navbar .dropdown-item').on('click', function (e) {
+        var $el = $(this).children('.dropdown-toggle');
+        var $parent = $el.offsetParent(".dropdown-menu");
+        $(this).parent("li").toggleClass('open');
+
+        if (!$parent.parent().hasClass('navbar-nav')) {
+            if ($parent.hasClass('show')) {
+                $parent.removeClass('show');
+                $el.next().removeClass('show');
+                $el.next().css({"top": -999, "left": -999});
+            } else {
+                $parent.parent().find('.show').removeClass('show');
+                $parent.addClass('show');
+                $el.next().addClass('show');
+                $el.next().css({"top": $el[0].offsetTop, "left": $parent.outerWidth() - 4});
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
+
+    $('.navbar .dropdown').on('hidden.bs.dropdown', function () {
+        $(this).find('li.dropdown').removeClass('show open');
+        $(this).find('ul.dropdown-menu').removeClass('show open');
+    });
+
+});
+</script>
+
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}
+    {% if title %}
+    {{ title }} - WeAreTraders{% else %}{{ _('Welcome to WeAreTraders') }}
+    {% endif %}
+{% endblock %}
+
+
+{% block navbar %}
+    <nav class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">WeAreTraders</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                      <a href="{{ url_for('main.index') }}">{{ _('Home') }}</a>
+                    </li>
+                    <li>
+                      <a href="{{ url_for('main.explore') }}">{{ _('Explore') }}</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" id="dropdown1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Categories
+                      </a>
+                      <ul class="dropdown-menu" aria-labelledby="dropdown1">
+                          <li class="dropdown-item" href="#">
+                            <a href='{{ url_for('main.categorypage', category = 'electronics') }}'>
+                              Electronics
+                            </a>
+                          </li>
+                          <li class="dropdown-item" href="#">
+                            <a href='{{ url_for('main.categorypage', category = 'clothes') }}'>
+                              Clothes
+                            </a>
+                          </li>
+                          <li class="dropdown-item" href="#">
+                            <a href='{{ url_for('main.categorypage', category ='pets') }}'>
+                              Pets
+                            </a>
+                      </ul>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_anonymous %}
+                    <li><a href="{{ url_for('auth.login') }}">{{ _('Login') }}</a></li>
+                    {% else %}
+                    <li><a href="{{ url_for('main.user', username=current_user.username) }}">{{ _('Profile') }}</a></li>
+                    <li><a href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-info" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        {# application content needs to be provided in the app_content block #}
+        {% block app_content %}{% endblock %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
+    {{ moment.lang(g.locale) }}
+    <script>
+        function translate(sourceElem, destElem, sourceLang, destLang) {
+            $(destElem).html('<img src="{{ url_for('static', filename='loading.gif') }}">');
+            $.post('/translate', {
+                text: $(sourceElem).text(),
+                source_language: sourceLang,
+                dest_language: destLang
+            }).done(function(response) {
+                $(destElem).text(response['text'])
+            }).fail(function() {
+                $(destElem).text("{{ _('Error: Could not contact server.') }}");
+            });
+        }
+    </script>
+{% endblock %}

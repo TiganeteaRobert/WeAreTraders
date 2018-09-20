@@ -1,0 +1,20 @@
+
+
+<table class="table table-hover">
+    <tr>
+        <td>
+            {% set user_link %}
+                <a href="{{ url_for('main.user', username=review.review_author) }}">
+                    {{ review.review_author }}
+                </a>
+            {% endset %}
+            <span style="float: left; width: 30vw; text-overflow: ellipsis; overflow: hidden;"><b>{{ review.title }}</b></span>
+            <span style="float: right; font-size: 0.75em;">{{ _('%(when)s by %(username)s',
+                username=user_link, when=moment(review.timestamp).fromNow()) }}</span>
+            <br>
+
+            <span style="float: left; width: 45vw; height: 6vh; text-overflow: ellipsis; overflow: hidden;" id="review{{ review.id }}">{{ review.body }}</span>
+            <span style="float: right; font-size: 2vh; color: 'gold'" id="review{{ review.id }}"><br><b>Rating: &nbsp</b>{{ review.rating }} Stars</span>
+        </td>
+    </tr>
+</table>
